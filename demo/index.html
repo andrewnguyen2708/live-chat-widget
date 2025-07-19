@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat Widget Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .feature {
+            text-align: left;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .feature h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .feature p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .demo-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 40px 0;
+            text-align: left;
+            border-radius: 5px;
+        }
+        
+        .demo-info h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .demo-info p {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .integration-code {
+            background: #263238;
+            color: #aed581;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .cta {
+            margin-top: 40px;
+        }
+        
+        .cta-text {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Chat Widget Demo</h1>
+        <p class="subtitle">
+            Experience our modern, React-powered live chat widget. 
+            Look for the blue chat button in the bottom right corner!
+        </p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🚀 Modern Tech Stack</h3>
+                <p>Built with React, TypeScript, and Tailwind CSS for a smooth, type-safe experience.</p>
+            </div>
+            <div class="feature">
+                <h3>📱 Responsive Design</h3>
+                <p>Works perfectly on desktop, tablet, and mobile devices with adaptive layouts.</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ Lightning Fast</h3>
+                <p>Optimized bundle size and lazy loading for minimal impact on page performance.</p>
+            </div>
+            <div class="feature">
+                <h3>🎨 Customizable</h3>
+                <p>Easy to customize colors, text, and behavior to match your brand.</p>
+            </div>
+        </div>
+        
+        <div class="demo-info">
+            <h3>How to Test the Widget:</h3>
+            <p>
+                1. Click the blue chat button in the bottom right corner<br>
+                2. Fill in your name and email to start a conversation<br>
+                3. Send messages and see the simulated agent responses<br>
+                4. Close and reopen the chat to see the persistent state
+            </p>
+        </div>
+        
+        <div class="integration-code">
+            <code>&lt;script<br>
+&nbsp;&nbsp;src="https://your-domain.com/widget-loader.js?key=YOUR_CLIENT_KEY"<br>
+&nbsp;&nbsp;id="ze-snippet"<br>
+&nbsp;&nbsp;async<br>
+&gt;&lt;/script&gt;</code>
+        </div>
+        
+        <div class="cta">
+            <p class="cta-text">Ready to enhance your customer support?</p>
+            <span class="badge">Widget Active - Try it now! →</span>
+        </div>
+    </div>
+
+    <!-- Load the widget -->
+    <script
+        src="../widget-loader-demo.js?key=DEMO_CLIENT_KEY"
+        id="ze-snippet"
+        async
+    ></script>
+</body>
+</html>
