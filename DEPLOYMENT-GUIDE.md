@@ -4,7 +4,7 @@ This guide shows you how to deploy the widget to your own domain so clients can 
 
 ```html
 <script
-  src="https://yourdomain.com/widget-loader.js?key=CLIENT_KEY"
+  src="https://live-chat-widget.vercel.app/widget-loader.js?key=CLIENT_KEY"
   id="ze-snippet"
   async
 ></script>
@@ -13,18 +13,23 @@ This guide shows you how to deploy the widget to your own domain so clients can 
 ## 🚀 Quick Start
 
 ### Step 1: Build for Production
+
 ```bash
 ./deploy-production.sh
 ```
 
 ### Step 2: Update Your Domain
+
 Edit `production-dist/widget-loader.js` and change line 9:
+
 ```javascript
-const WIDGET_BASE_URL = "https://yourdomain.com"; // Your actual domain
+const WIDGET_BASE_URL = 'https://live-chat-widget.vercel.app'; // Your actual domain
 ```
 
 ### Step 3: Upload Files
+
 Upload all files from `production-dist/` to your web server:
+
 - `widget-loader.js`
 - `widget.html`
 - `widget.bundle.js`
@@ -35,6 +40,7 @@ Upload all files from `production-dist/` to your web server:
 ### Option 1: Traditional Web Hosting (cPanel, FTP)
 
 1. Build the widget:
+
    ```bash
    ./deploy-production.sh
    ```
@@ -47,17 +53,19 @@ Upload all files from `production-dist/` to your web server:
 
 4. Your widget will be available at:
    ```
-   https://yourdomain.com/widget/widget-loader.js
+   https://live-chat-widget.vercel.app/widget/widget-loader.js
    ```
 
 ### Option 2: VPS/Cloud Server (AWS, DigitalOcean, etc.)
 
 1. Build the widget:
+
    ```bash
    ./deploy-production.sh
    ```
 
 2. Copy files to your server:
+
    ```bash
    scp -r production-dist/* user@yourserver:/var/www/html/widget/
    ```
@@ -65,6 +73,7 @@ Upload all files from `production-dist/` to your web server:
 3. Configure Nginx/Apache with CORS headers:
 
 **Nginx example:**
+
 ```nginx
 location /widget/ {
     add_header Access-Control-Allow-Origin *;
@@ -73,6 +82,7 @@ location /widget/ {
 ```
 
 **Apache example (.htaccess):**
+
 ```apache
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
@@ -83,16 +93,19 @@ location /widget/ {
 ### Option 3: Static Site Hosting
 
 **Vercel:**
+
 ```bash
 cd production-dist
 vercel --prod
 ```
 
 **Netlify:**
+
 1. Drag `production-dist` folder to [app.netlify.com/drop](https://app.netlify.com/drop)
 2. Update domain in widget-loader.js
 
 **GitHub Pages:**
+
 ```bash
 # Create gh-pages branch
 git checkout -b gh-pages
@@ -105,7 +118,9 @@ git push origin gh-pages
 ## ⚙️ Required Server Configuration
 
 ### CORS Headers
+
 Your server must include these headers:
+
 ```
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, OPTIONS
@@ -113,28 +128,31 @@ Access-Control-Allow-Headers: Content-Type
 ```
 
 ### MIME Types
+
 Ensure correct MIME types:
+
 - `.js` files: `application/javascript`
 - `.html` files: `text/html`
 
 ## 🧪 Testing Your Deployment
 
 1. **Create a test page:**
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Widget Test</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Testing Chat Widget</h1>
-    
+
     <script
-        src="https://yourdomain.com/widget-loader.js?key=TEST_KEY"
-        id="ze-snippet"
-        async
+      src="https://live-chat-widget.vercel.app/widget-loader.js?key=TEST_KEY"
+      id="ze-snippet"
+      async
     ></script>
-</body>
+  </body>
 </html>
 ```
 
@@ -149,13 +167,14 @@ Once deployed, share this with your clients:
 ```html
 <!-- Add this before </body> tag -->
 <script
-  src="https://yourdomain.com/widget-loader.js?key=YOUR_CLIENT_KEY"
+  src="https://live-chat-widget.vercel.app/widget-loader.js?key=YOUR_CLIENT_KEY"
   id="ze-snippet"
   async
 ></script>
 ```
 
 ### Client Requirements:
+
 - Website must use HTTPS
 - JavaScript must be enabled
 - Modern browser (Chrome, Firefox, Safari, Edge)
@@ -169,16 +188,19 @@ Once deployed, share this with your clients:
 ## 🚨 Troubleshooting
 
 ### Widget not showing
+
 - Check browser console for errors
 - Verify CORS headers are set
 - Ensure all files are uploaded
 - Check the script tag has `id="ze-snippet"`
 
 ### CORS errors
+
 - Add proper headers to your server
 - Ensure widget.html is served from same domain as widget-loader.js
 
 ### 404 errors
+
 - Verify file paths are correct
 - Check WIDGET_BASE_URL in widget-loader.js
 
