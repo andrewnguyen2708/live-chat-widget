@@ -21,3 +21,6 @@ yarn-error.log*
 *.config.ts
 package-lock.json
 yarn.lock
+
+# demo
+demo
