@@ -6,7 +6,7 @@
  */
 (() => {
   // IMPORTANT: Update this URL to where you host the widget files
-  const WIDGET_BASE_URL = 'https://chat-widget.vercel.app'; // Change this to your Vercel URL
+  const WIDGET_BASE_URL = 'https://live-chat-widget.vercel.app'; // Change this to your Vercel URL
 
   // Find the script tag
   const thisScript = document.getElementById('ze-snippet');
