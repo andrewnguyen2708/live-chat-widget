@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #3b82f6; /* Màu mặc định */
+        --text-color-on-primary: #ffffff;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: transparent;
+      }
+      .chat-bubble {
+        background-color: var(--primary-color);
+        color: var(--text-color-on-primary);
+      }
+      .chat-header {
+        background-color: var(--primary-color);
+        color: var(--text-color-on-primary);
+      }
+      .message-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px var(--primary-color);
+      }
+      .send-btn {
+        background-color: var(--primary-color);
+        color: var(--text-color-on-primary);
+      }
+      .message-list {
+        scroll-behavior: smooth;
+      }
+      .quick-reply-btn {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+      .quick-reply-btn:hover {
+        background-color: var(--primary-color);
+        color: var(--text-color-on-primary);
+      }
+      /* Custom scrollbar */
+      .message-list::-webkit-scrollbar {
+        width: 6px;
+      }
+      .message-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      .message-list::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+      }
+      .message-list::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+      }
+    </style>
+  </head>
+  <body class="w-full h-full">
+    <div
+      id="chat-widget-container"
+      class="w-full h-full flex flex-col transition-all duration-300"
+    >
+      <!-- Nút bubble để mở chat -->
+      <div
+        id="chat-bubble"
+        class="absolute bottom-0 right-0 m-0 w-16 h-16 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-transform hover:scale-110"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-8 w-8"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M18 10c0 3.866-3.582 7-8 7a8.839 8.839 0 01-4.083-.98L2 17l1.08-3.239A7.962 7.962 0 012 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM4.416 11.92a6 6 0 108.468-8.468 6 6 0 00-8.468 8.468z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+
+      <!-- Cửa sổ chat chính (ẩn mặc định) -->
+      <div
+        id="chat-window"
+        class="w-full h-full flex flex-col bg-white rounded-lg opacity-0 pointer-events-none transform scale-95 transition-all duration-300"
+      >
+        <!-- Header -->
+        <div
+          class="chat-header p-4 flex items-center justify-between rounded-t-lg shadow-md"
+        >
+          <h3 id="chat-title" class="font-bold text-lg">Chat với chúng tôi</h3>
+          <button id="close-btn" class="p-1 rounded-full hover:bg-white/20">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Vùng hiển thị lỗi -->
+        <div
+          id="error-display"
+          class="hidden p-3 bg-red-100 text-red-700 text-sm text-center"
+        ></div>
+
+        <!-- Vùng hiển thị loading -->
+        <div
+          id="loading-spinner"
+          class="flex-grow flex items-center justify-center"
+        >
+          <svg
+            class="animate-spin h-8 w-8 text-gray-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </div>
+
+        <!-- Danh sách tin nhắn -->
+        <div
+          id="message-list"
+          class="flex-grow p-4 overflow-y-auto hidden"
+        ></div>
+
+        <!-- Vùng nhập tin nhắn -->
+        <div
+          id="message-input-area"
+          class="p-4 border-t border-gray-200 hidden"
+        >
+          <div
+            id="quick-replies-container"
+            class="flex flex-wrap gap-2 mb-2"
+          ></div>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="message-input"
+              placeholder="Nhập tin nhắn..."
+              class="message-input flex-grow px-3 py-2 border border-gray-300 rounded-lg focus:outline-none transition-all"
+            />
+            <button
+              id="send-btn"
+              class="send-btn p-2 rounded-lg transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009.17 15.57l-1.722-4.906a1 1 0 01.33-1.013l4.906-4.906a1 1 0 011.013-.33l4.906 1.722a1 1 0 001.57-.828l1.428-5A1 1 0 0010.894 2.553z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // =================================================================
+        // 0. KHỞI TẠO BIẾN VÀ LẤY DOM ELEMENTS
+        // =================================================================
+        const params = new URLSearchParams(window.location.search);
+        const widgetId = params.get("widgetId");
+        const hostUrl = params.get("hostUrl");
+
+        const chatContainer = document.getElementById("chat-widget-container");
+        const chatBubble = document.getElementById("chat-bubble");
+        const chatWindow = document.getElementById("chat-window");
+        const closeBtn = document.getElementById("close-btn");
+        const messageList = document.getElementById("message-list");
+        const messageInputArea = document.getElementById("message-input-area");
+        const messageInput = document.getElementById("message-input");
+        const sendBtn = document.getElementById("send-btn");
+        const errorDisplay = document.getElementById("error-display");
+        const loadingSpinner = document.getElementById("loading-spinner");
+        const chatTitle = document.getElementById("chat-title");
+        const quickRepliesContainer = document.getElementById(
+          "quick-replies-container"
+        );
+
+        let widgetConfig = null;
+        let websocket = null;
+        let isFirstMessage = true;
+        let ticketId = null;
+        let i18n = {};
+        let reconnectAttempts = 0;
+
+        // =================================================================
+        // 5. HỖ TRỢ ĐA NGÔN NGỮ (i18n)
+        // =================================================================
+        const translations = {
+          en: {
+            chatWithUs: "Chat with us",
+            typeMessage: "Type a message...",
+            welcome: "Hello! How can we help you today?",
+            error: {
+              config: "Error: Could not load widget configuration.",
+              auth: "Error: This widget is not authorized for this domain.",
+              ticket:
+                "Error: Could not create a support ticket. Please try again.",
+              websocket: "Connection lost. Attempting to reconnect...",
+              generic: "An unexpected error occurred. Please refresh.",
+            },
+          },
+          vi: {
+            chatWithUs: "Chat với chúng tôi",
+            typeMessage: "Nhập tin nhắn...",
+            welcome: "Xin chào! Chúng tôi có thể giúp gì cho bạn?",
+            error: {
+              config: "Lỗi: Không thể tải cấu hình widget.",
+              auth: "Lỗi: Widget không được phép hoạt động trên tên miền này.",
+              ticket: "Lỗi: Không thể tạo phiếu hỗ trợ. Vui lòng thử lại.",
+              websocket: "Mất kết nối. Đang cố gắng kết nối lại...",
+              generic: "Đã xảy ra lỗi không mong muốn. Vui lòng tải lại.",
+            },
+          },
+        };
+
+        function initI18n(lang) {
+          const langCode = translations[lang] ? lang : "en"; // Fallback về tiếng Anh
+          i18n = translations[langCode];
+          // Áp dụng ngôn ngữ cho UI
+          chatTitle.textContent = i18n.chatWithUs;
+          messageInput.placeholder = i18n.typeMessage;
+        }
+
+        // Hàm tiện ích dịch thuật
+        function t(key) {
+          // Hỗ trợ key lồng nhau, ví dụ: 'error.config'
+          return key
+            .split(".")
+            .reduce(
+              (obj, k) => (obj && obj[k] !== "undefined" ? obj[k] : key),
+              i18n
+            );
+        }
+
+        // =================================================================
+        // 4. XỬ LÝ LỖI & HIỂN THỊ
+        // =================================================================
+        function showError(messageKey) {
+          const message = t(messageKey);
+          console.error(`Widget Error: ${message}`);
+          errorDisplay.textContent = message;
+          errorDisplay.classList.remove("hidden");
+          loadingSpinner.classList.add("hidden");
+          messageList.classList.add("hidden");
+          messageInputArea.classList.add("hidden");
+        }
+
+        // =================================================================
+        // 2. API & CẤU HÌNH WIDGET
+        // =================================================================
+        async function fetchWidgetConfig() {
+          console.log(`[Config] Fetching config for widgetId: ${widgetId}`);
+
+          // --- GIẢ LẬP GỌI API ---
+          // Trong thực tế, bạn sẽ dùng fetch() để gọi đến backend thật
+          // `fetch('https://api.yourserver.com/v1/widget/config/${widgetId}', { headers: { 'Referer': hostUrl }})`
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              // Giả lập dữ liệu cấu hình từ backend
+              const mockConfigs = {
+                wg_live_1a2b3c4d5e6f: {
+                  tenantId: "tenant_123",
+                  allowedURLs: [
+                    "http://127.0.0.1:5500",
+                    "http://localhost:5500",
+                  ], // Cho phép chạy trên local server
+                  ui: {
+                    primaryColor: "#16a34a", // Màu xanh lá
+                    language: "vi",
+                  },
+                  welcomeMessage: "Xin chào! Chúng tôi có thể giúp gì cho bạn?",
+                },
+                wg_test_7x8y9z: {
+                  tenantId: "tenant_456",
+                  allowedURLs: ["https://example.com"],
+                  ui: {
+                    primaryColor: "#be185d", // Màu hồng đậm
+                    language: "en",
+                  },
+                  welcomeMessage: "Welcome to our support chat!",
+                },
+              };
+
+              const config = mockConfigs[widgetId];
+
+              if (!config) {
+                return reject(new Error("Invalid widgetId"));
+              }
+
+              // Yêu cầu bảo mật: Kiểm tra Referer/Origin
+              const isAllowed = config.allowedURLs.some((url) =>
+                hostUrl.startsWith(url)
+              );
+              if (!isAllowed) {
+                console.warn(
+                  `[Security] Domain '${hostUrl}' is not in allowedURLs.`
+                );
+                return reject(new Error("Domain not allowed"));
+              }
+
+              console.log("[Config] Fetched successfully:", config);
+              resolve(config);
+            }, 1000); // Giả lập độ trễ mạng
+          });
+        }
+
+        function applyConfig(config) {
+          document.documentElement.style.setProperty(
+            "--primary-color",
+            config.ui.primaryColor
+          );
+          // Có thể thêm các cấu hình UI khác ở đây
+        }
+
+        // =================================================================
+        // 1. XỬ LÝ WEBSOCKET REAL-TIME
+        // =================================================================
+        function connectWebSocket() {
+          // --- GIẢ LẬP WEBSOCKET SERVER ---
+          // Trong thực tế: `websocket = new WebSocket('wss://ws.yourserver.com/chat?tenantId=' + widgetConfig.tenantId)`
+          console.log(
+            `[WebSocket] Attempting to connect with tenantId: ${widgetConfig.tenantId}`
+          );
+
+          // Giả lập kết nối thành công
+          setTimeout(() => {
+            console.log("[WebSocket] Connection established.");
+            websocket = { status: "open" }; // Đối tượng giả lập
+            reconnectAttempts = 0; // Reset số lần thử lại
+            showInitialMessages();
+
+            // Giả lập nhận tin nhắn từ server sau mỗi 5s
+            setInterval(() => {
+              if (websocket && websocket.status === "open" && !isFirstMessage) {
+                const randomReplies = [
+                  {
+                    type: "chat",
+                    text: "Chúng tôi đã nhận được tin nhắn của bạn và sẽ phản hồi sớm nhất có thể.",
+                  },
+                  { type: "chat", text: "Cảm ơn bạn đã liên hệ." },
+                  {
+                    type: "quick-reply",
+                    text: "Bạn có cần hỗ trợ thêm về vấn đề gì không?",
+                    replies: ["Sản phẩm", "Thanh toán", "Khác"],
+                  },
+                ];
+                const reply =
+                  randomReplies[
+                    Math.floor(Math.random() * randomReplies.length)
+                  ];
+                handleIncomingMessage(reply);
+              }
+            }, 8000);
+          }, 1500);
+
+          // Giả lập mất kết nối sau 20 giây để test reconnect
+          setTimeout(() => {
+            if (websocket) {
+              handleWebSocketClose();
+            }
+          }, 20000);
+        }
+
+        function handleWebSocketClose() {
+          console.log("[WebSocket] Connection closed.");
+          websocket = null;
+          showError("error.websocket");
+
+          // Tự động kết nối lại (Yêu cầu 1)
+          const reconnectDelay = Math.min(1000 * 2 ** reconnectAttempts, 30000); // Exponential backoff
+          console.log(
+            `[WebSocket] Reconnecting in ${reconnectDelay / 1000}s...`
+          );
+          setTimeout(() => {
+            reconnectAttempts++;
+            connectWebSocket();
+          }, reconnectDelay);
+        }
+
+        function handleIncomingMessage(data) {
+          // const message = JSON.parse(data); // Trong thực tế
+          const message = data; // Giả lập
+          console.log("[WebSocket] Received message:", message);
+
+          switch (message.type) {
+            case "chat":
+              addMessageToUI(message.text, "agent");
+              clearQuickReplies();
+              break;
+            case "quick-reply":
+              addMessageToUI(message.text, "agent");
+              showQuickReplies(message.replies);
+              break;
+            // Thêm các case khác nếu cần
+          }
+        }
+
+        function sendMessage(text) {
+          if (websocket && websocket.status === "open") {
+            const payload = {
+              type: "chat",
+              ticketId: ticketId,
+              text: text,
+            };
+            // websocket.send(JSON.stringify(payload)); // Gửi thật
+            console.log("[WebSocket] Sending message:", payload);
+            addMessageToUI(text, "user");
+          } else {
+            console.error(
+              "[WebSocket] Cannot send message, connection is not open."
+            );
+            addMessageToUI(text, "user", true); // Hiển thị tin nhắn với trạng thái lỗi
+          }
+        }
+
+        // =================================================================
+        // 3. XỬ LÝ TẠO TICKET
+        // =================================================================
+        async function createTicket(firstMessage) {
+          console.log("[Ticket] Creating ticket with first message...");
+
+          // --- GIẢ LẬP GỌI API TẠO TICKET ---
+          // Trong thực tế: `fetch('https://api.yourserver.com/v1/tickets', { method: 'POST', ... })`
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              const browserInfo = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+              };
+              const payload = {
+                widgetId: widgetId,
+                tenantId: widgetConfig.tenantId,
+                pageURL: hostUrl,
+                browserInfo: browserInfo,
+                firstMessage: firstMessage,
+              };
+
+              console.log("[Ticket] API Request Payload:", payload);
+
+              // Giả lập thành công
+              const newTicketId = "tkt_" + Date.now();
+              console.log(
+                "[Ticket] Created successfully. Ticket ID:",
+                newTicketId
+              );
+              resolve(newTicketId);
+
+              // Để giả lập lỗi, bạn có thể uncomment dòng dưới
+              // reject(new Error("Failed to create ticket"));
+            }, 800);
+          });
+        }
+
+        // =================================================================
+        // CÁC HÀM TIỆN ÍCH UI
+        // =================================================================
+        function addMessageToUI(text, sender, isError = false) {
+          const messageElement = document.createElement("div");
+          const bubble = document.createElement("div");
+
+          messageElement.classList.add(
+            "flex",
+            "mb-3",
+            "max-w-xs",
+            "md:max-w-sm"
+          );
+          bubble.classList.add("px-4", "py-2", "rounded-xl");
+          bubble.textContent = text;
+
+          if (sender === "user") {
+            messageElement.classList.add("ml-auto", "justify-end");
+            bubble.classList.add("bg-blue-500", "text-white");
+            bubble.style.backgroundColor = "var(--primary-color)";
+            bubble.style.color = "var(--text-color-on-primary)";
+            if (isError) {
+              bubble.classList.add("opacity-50");
+            }
+          } else {
+            // agent
+            messageElement.classList.add("mr-auto", "justify-start");
+            bubble.classList.add("bg-gray-200", "text-gray-800");
+          }
+
+          messageElement.appendChild(bubble);
+          messageList.appendChild(messageElement);
+          messageList.scrollTop = messageList.scrollHeight; // Cuộn xuống cuối
+        }
+
+        function showQuickReplies(replies) {
+          clearQuickReplies();
+          replies.forEach((replyText) => {
+            const button = document.createElement("button");
+            button.textContent = replyText;
+            button.classList.add(
+              "quick-reply-btn",
+              "px-3",
+              "py-1",
+              "border",
+              "rounded-full",
+              "text-sm",
+              "transition-colors"
+            );
+            button.onclick = () => {
+              handleSend(replyText);
+              clearQuickReplies();
+            };
+            quickRepliesContainer.appendChild(button);
+          });
+        }
+
+        function clearQuickReplies() {
+          quickRepliesContainer.innerHTML = "";
+        }
+
+        function showInitialMessages() {
+          loadingSpinner.classList.add("hidden");
+          messageList.classList.remove("hidden");
+          messageInputArea.classList.remove("hidden");
+          errorDisplay.classList.add("hidden");
+          addMessageToUI(widgetConfig.welcomeMessage || t("welcome"), "agent");
+        }
+
+        function toggleChat(open) {
+          if (open) {
+            chatWindow.classList.remove(
+              "opacity-0",
+              "pointer-events-none",
+              "scale-95"
+            );
+            chatBubble.classList.add(
+              "opacity-0",
+              "pointer-events-none",
+              "scale-95"
+            );
+            chatContainer.style.width = "400px";
+            chatContainer.style.height = "calc(100vh - 40px)";
+          } else {
+            chatWindow.classList.add(
+              "opacity-0",
+              "pointer-events-none",
+              "scale-95"
+            );
+            chatBubble.classList.remove(
+              "opacity-0",
+              "pointer-events-none",
+              "scale-95"
+            );
+            chatContainer.style.width = "64px";
+            chatContainer.style.height = "64px";
+          }
+        }
+
+        // =================================================================
+        // XỬ LÝ SỰ KIỆN
+        // =================================================================
+        async function handleSend(textOverride) {
+          const text = textOverride || messageInput.value.trim();
+          if (text === "") return;
+
+          if (isFirstMessage) {
+            sendBtn.disabled = true;
+            try {
+              const newTicketId = await createTicket(text);
+              ticketId = newTicketId;
+              isFirstMessage = false;
+              sendMessage(text);
+            } catch (error) {
+              console.error(error);
+              showError("error.ticket");
+              addMessageToUI(text, "user", true); // Hiển thị tin nhắn lỗi
+            } finally {
+              sendBtn.disabled = false;
+            }
+          } else {
+            sendMessage(text);
+          }
+
+          if (!textOverride) {
+            messageInput.value = "";
+          }
+          messageInput.focus();
+        }
+
+        chatBubble.addEventListener("click", () => toggleChat(true));
+        closeBtn.addEventListener("click", () => toggleChat(false));
+        sendBtn.addEventListener("click", () => handleSend());
+        messageInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSend();
+          }
+        });
+
+        // =================================================================
+        // HÀM CHÍNH KHỞI CHẠY ỨNG DỤNG
+        // =================================================================
+        async function initializeApp() {
+          if (!widgetId) {
+            return showError("error.config"); // Lỗi này sẽ hiển thị bên trong iframe
+          }
+
+          try {
+            // 1. Lấy cấu hình
+            const config = await fetchWidgetConfig();
+            widgetConfig = config;
+
+            // 2. Áp dụng cấu hình UI và ngôn ngữ
+            applyConfig(config);
+            initI18n(config.ui.language);
+
+            // 3. Kết nối WebSocket
+            connectWebSocket();
+
+            // 4. Mở sẵn cửa sổ chat khi khởi tạo thành công
+            toggleChat(true);
+          } catch (error) {
+            if (error.message === "Domain not allowed") {
+              showError("error.auth");
+            } else {
+              showError("error.config");
+            }
+            toggleChat(true); // Mở cửa sổ để hiển thị lỗi
+          }
+        }
+
+        // Bắt đầu chạy
+        initializeApp();
+      });
+    </script>
+  </body>
+</html>
