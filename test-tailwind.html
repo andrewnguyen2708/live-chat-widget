@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Tailwind Widget</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .info {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="info">
+      <h1>Testing Tailwind CSS Widget</h1>
+      <p>The widget should appear in the bottom right corner with Tailwind styles applied.</p>
+      <p>Look for:</p>
+      <ul>
+        <li>Blue launcher button (bg-blue-600)</li>
+        <li>Rounded corners and shadows</li>
+        <li>Hover effects on buttons</li>
+        <li>Styled form inputs with focus states</li>
+      </ul>
+    </div>
+
+    <!-- Widget iframe to test -->
+    <iframe 
+      src="dist/widget.html?key=TEST_KEY" 
+      style="position: fixed; bottom: 0; right: 0; width: 400px; height: 550px; border: none; z-index: 9999;"
+    ></iframe>
+  </body>
+</html>
